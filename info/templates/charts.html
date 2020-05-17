@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+<script>
+{% block jquery %}
+
+$(document).ready(function() {
+
+    setInterval(reterivedata, 10000);
+});
+
+function adddata(){
+	myLineChart.data.datasets[0].data[myLineChart.data.datasets[0].data.length] = 60;
+    myLineChart.data.labels[myLineChart.data.labels.length] = "Newly Added";
+    myLineChart.update();
+}
+
+
+var endpoint = "/api/coord/"
+
+function reterivedata() {
+    var X = [];
+    var Y = [];
+    $.ajax({
+
+        method: "GET",
+        url: endpoint,
+
+        success : function(data) {
+            for (let i = 0; i < data.length; i++) {
+                const element = data[i];
+                X.push(element.x)
+                Y.push(element.y)
+            }
+            defaultData = data.y
+            labels = data.x
+            setChart(data)
+        },
+        error: function(error){
+            console.log(error)
+        }
+
+    });
+}
+function setChart(data){
+    var ctx = document.getElementById("myChart");
+    var ctx2 = document.getElementById("myChart2");
+    console.log(data.x);
+
+
+    var myChart = new Chart(ctx2, {
+    type: 'line',
+    data: {
+        labels: X,
+        datasets: [{
+            label: 'My First dataset',
+            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            data: Y
+        }]
+    },
+});
+}
+{% endblock %}
+</script>
+
+{% block content %}
+
+<div class='row'>
+    <div class='col-sm-12'>
+        <h1>Hello World</h1>
+    </div>
+    <div class='col-sm-6'>
+        <canvas id="myChart2" width="400" height="400"></canvas>
+        <input class="btn btn-danger" type="button" value="Add Data" onclick="adddata()">
+    </div>
+</div>
+{% endblock content %}
